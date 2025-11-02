@@ -1,0 +1,32 @@
+// LoginServlet.java
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        PrintWriter out = resp.getWriter();
+        resp.setContentType("text/html");
+        out.println("<html><body>");
+        out.println("<form method='post' action='login'>");
+        out.println("Username: <input type='text' name='username'/><br/>");
+        out.println("Password: <input type='password' name='password'/><br/>");
+        out.println("<input type='submit' value='Login'/>");
+        out.println("</form></body></html>");
+    }
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String user = req.getParameter("username");
+        String pass = req.getParameter("password");
+        resp.setContentType("text/html");
+        PrintWriter out = resp.getWriter();
+        if ("admin".equals(user) && "admin123".equals(pass)) {
+            out.println("<h2>Welcome, " + user + "!</h2>");
+        } else {
+            out.println("<h3>Invalid credentials. <a href='login'>Try again</a></h3>");
+        }
+    }
+}
