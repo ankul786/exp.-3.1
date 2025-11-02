@@ -1,0 +1,44 @@
+// EmployeeServlet.java
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+import java.io.*;
+import java.sql.*;
+
+@WebServlet("/employees")
+public class EmployeeServlet extends HttpServlet {
+
+    // Database config - change to your db details
+    private final String url = "jdbc:mysql://localhost:3306/yourdb";
+    private final String user = "root";
+    private final String password = "password";
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String id = req.getParameter("id");
+        resp.setContentType("text/html");
+        PrintWriter out = resp.getWriter();
+        out.println("<html><body>");
+        out.println("<form method='get' action='employees'>Search by ID: <input name='id' /> <input type='submit' value='Search'/></form>");
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = (id == null || id.isEmpty()) ?
+                conn.prepareStatement("SELECT * FROM employees") :
+                conn.prepareStatement("SELECT * FROM employees WHERE id=?")) {
+
+            if (id != null && !id.isEmpty()) {
+                stmt.setInt(1, Integer.parseInt(id));
+            }
+            ResultSet rs = stmt.executeQuery();
+            out.println("<h2>Employee Records</h2>");
+            out.println("<table border='1'><tr><th>ID</th><th>Name</th><th>Department</th></tr>");
+            while (rs.next()) {
+                out.println("<tr><td>" + rs.getInt("id") + "</td>");
+                out.println("<td>" + rs.getString("name") + "</td>");
+                out.println("<td>" + rs.getString("department") + "</td></tr>");
+            }
+            out.println("</table>");
+        } catch (SQLException e) {
+            out.println("<p>Error: " + e.getMessage() + "</p>");
+        }
+        out.println("</body></html>");
+    }
+}
