@@ -1,0 +1,51 @@
+//AttendanceForm.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<html>
+<body>
+<form action="attendance" method="post">
+    Student ID: <input name="studentId" required /><br/>
+    Date (YYYY-MM-DD): <input type="date" name="date" required /><br/>
+    Status:
+    <select name="status">
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+    </select><br/>
+    <input type="submit" value="Submit Attendance" />
+</form>
+</body>
+</html>
+
+//AttendanceServlet.java
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.*;
+import java.io.IOException;
+import java.sql.*;
+
+@WebServlet("/attendance")
+public class AttendanceServlet extends HttpServlet {
+    private final String url = "jdbc:mysql://localhost:3306/yourdb";
+    private final String user = "root";
+    private final String password = "password";
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String studentId = req.getParameter("studentId");
+        String date = req.getParameter("date");
+        String status = req.getParameter("status");
+
+        resp.setContentType("text/html");
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(
+                 "INSERT INTO attendance(student_id, attendance_date, status) VALUES (?, ?, ?)")) {
+            stmt.setInt(1, Integer.parseInt(studentId));
+            stmt.setDate(2, java.sql.Date.valueOf(date));
+            stmt.setString(3, status);
+            int rows = stmt.executeUpdate();
+            resp.getWriter().println(rows > 0 ? "Attendance recorded successfully" : "Failed to record attendance");
+        } catch (Exception e) {
+            resp.getWriter().println("Error: " + e.getMessage());
+        }
+    }
+}
